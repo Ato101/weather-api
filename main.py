@@ -3,21 +3,25 @@ import pandas as pd
 
 app = Flask(__name__)
 
-
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template('home.html')
+    station =pd.read_csv('003 data-small/stations.txt',skiprows=17)
+    station=station[['STAID','STANAME                                 ']][0:100]
+
+    return render_template('home.html',context=station.to_html())
 
 @app.route("/api/v1/<station>/<date>")
 def about(station,date):
-    temperature =50
+    filename = '003 data-small/TG_STAID' + str(station).zfill(6)+'.txt'
+    df = pd.read_csv(filename,skiprows =20,parse_dates=['    DATE'])
+    temperature=df.loc[df['    DATE'] == date]['   TG'].squeeze() / 10
     context = {
         station:station,
-        date : date,
+        'date': date,
         'temperature': temperature
     }
     return context
 
 
-if __name__=='main':
-    app.run(debug=True,port=5001)
+if __name__=='__main__':
+    app.run(debug=True,port=5000)
